@@ -133,6 +133,7 @@ void rawsocsniffer::setbit(unsigned int &p,int k)
 
 void rawsocsniffer::sniffer()
 {
+    dopromisc("ens33");
     struct sockaddr_in from;
     int sockaddr_len=sizeof(struct sockaddr_in);
     int recvlen=0;
