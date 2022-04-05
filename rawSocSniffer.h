@@ -16,9 +16,9 @@ private:
 	char *packet;
 	const int max_packet_len=2048;
 public:
-	rawsocsniffer(int protocol);
+	rawsocsniffer(int protocol, char* device_name);
 	~rawsocsniffer(){}
-	bool init();
+	bool init(char* device_name);
 	void setfilter(filter myfilter);
 	bool testbit(const unsigned int p, int k);
 	void setbit(unsigned int &p,int k);

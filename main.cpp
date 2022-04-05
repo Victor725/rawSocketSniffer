@@ -15,7 +15,10 @@ unsigned int bin_to_uint(char* s){
 }
 
 int main(){
-    rawsocsniffer rs(htons(ETH_P_ALL));
+    char device_name[20];
+    cout<<"please input device name : "<<endl;
+    cin>>device_name;
+    rawsocsniffer rs(htons(ETH_P_ALL),device_name);
     filter myfilter;
     char proto_s[5];
     cout<<"please input protocol to listen (10000b----RARP  1000b----ICMP  100b----UDP  10b----TCP  1b----ARP) : "<<endl;

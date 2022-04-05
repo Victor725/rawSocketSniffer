@@ -76,7 +76,7 @@ typedef struct icmp_header_t{
 
 
 typedef struct arp_packet_t{
-    ether_header_t ether_header;
+    ether_header_t etherheader;
     arp_header_t arpheader;
 } arp_packet_t;
 
@@ -106,10 +106,16 @@ typedef struct udp_packet_t{
 #pragma pack()
 
 
-rawsocsniffer::rawsocsniffer(int protocol):rawsocket(protocol){
+rawsocsniffer::rawsocsniffer(int protocol, char* device_name):rawsocket(protocol){
     packet=new char[max_packet_len];
     memset(packet,0,max_packet_len);
+    init(device_name);
 }
+
+bool rawsocsniffer::init(char* device_name){
+    return dopromisc(device_name);
+}
+
 
 void rawsocsniffer::setfilter(filter myfilter)
 {
@@ -133,7 +139,6 @@ void rawsocsniffer::setbit(unsigned int &p,int k)
 
 void rawsocsniffer::sniffer()
 {
-    dopromisc("ens33");
     struct sockaddr_in from;
     int sockaddr_len=sizeof(struct sockaddr_in);
     int recvlen=0;
@@ -202,25 +207,51 @@ void rawsocsniffer::print_ip_addr(const unsigned long ip){
 void rawsocsniffer::ParseARPPacket()
 {
     arp_packet_t *arppacket=(arp_packet_t *)packet;
-    print_hw_addr(arppacket->arpheader.des_hw_addr);
-    print_hw_addr(arppacket->arpheader.send_hw_addr);
-    cout<<endl;
+
+    switch(ntohs(arppacket->arpheader.flag)){
+    case 0x0001:
+        cout<<"ARP request"<<endl;
+        break;
+    case 0x0002:
+        cout<<"ARP reply"<<endl;
+        break;
+    }
+
+    cout<<setw(20)<<"MAC address: from ";
+    print_hw_addr(arppacket->etherheader.src_hw_addr);
+    cout<<"to ";
+    print_hw_addr(arppacket->etherheader.des_hw_addr);
+    cout<<endl<<setw(20)<<"IP address: from ";
     print_ip_addr(arppacket->arpheader.send_prot_addr);
+    cout<<"to ";
     print_ip_addr(arppacket->arpheader.des_prot_addr);
+    cout<<endl;
 }
 
 void rawsocsniffer::ParseRARPPacket()
 {
     arp_packet_t *arppacket=(arp_packet_t *)packet;
-    print_hw_addr(arppacket->arpheader.des_hw_addr);
-    print_hw_addr(arppacket->arpheader.send_hw_addr);
-    cout<<endl;
+
+    switch(ntohs(arppacket->arpheader.flag)){
+    case 0x0003:
+        cout<<"RARP request"<<endl;
+        break;
+    case 0x0004:
+        cout<<"RARP reply"<<endl;
+    }
+
+    cout<<setw(20)<<"MAC address: from ";
+    print_hw_addr(arppacket->etherheader.src_hw_addr);
+    cout<<"to ";
+    print_hw_addr(arppacket->etherheader.des_hw_addr);
+    cout<<endl<<setw(20)<<"IP address: from ";
     print_ip_addr(arppacket->arpheader.send_prot_addr);
+    cout<<"to ";
     print_ip_addr(arppacket->arpheader.des_prot_addr);
+    cout<<endl;
 }
 
 
-//TODO
 void rawsocsniffer::ParseIPPacket()
 {
     ip_packet_t *ippacket=(ip_packet_t *)packet; 
@@ -260,7 +291,6 @@ void rawsocsniffer::ParseIPPacket()
 	    	ParseUDPPacket();
 	    }
 	    break;
-//省略针对其他协议的分析
     }
 }
 
