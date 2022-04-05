@@ -5,6 +5,7 @@
 #include<iostream>
 #include<iomanip>
 #include<stdio.h>
+#include<cstring>
 using namespace std;
 
 
@@ -13,6 +14,7 @@ typedef unsigned short WORD;
 typedef unsigned long DWORD;
 
 
+#pragma pack(1)
 typedef struct ether_header_t{
     BYTE des_hw_addr[6];    //目的MAC地址
     BYTE src_hw_addr[6];    //源MAC地址
@@ -29,7 +31,7 @@ typedef struct ip_header_t{
     BYTE ttl;             //8位生存时间
     BYTE protocol;        //8位上层协议号    
     WORD checksum;      //16位校验和
-    DWORD src_ip;       //32位源IP地址                  ???????????????????????????????????not confirmed
+    DWORD src_ip;       //32位源IP地址                  
     DWORD des_ip;      //32位目的IP地址
 } ip_header_t;
 
@@ -101,9 +103,12 @@ typedef struct udp_packet_t{
     udp_header_t udpheader;
 };
 
+#pragma pack()
+
 
 rawsocsniffer::rawsocsniffer(int protocol):rawsocket(protocol){
     packet=new char[max_packet_len];
+    memset(packet,0,max_packet_len);
 }
 
 void rawsocsniffer::setfilter(filter myfilter)
@@ -221,13 +226,15 @@ void rawsocsniffer::ParseIPPacket()
     cout<<"ipheader.protocol: "<<int(ippacket->ipheader.protocol)<<endl;
     if(simfilter.sip!=0)
     {
-	    if(simfilter.sip!=(ippacket->ipheader.src_ip))
-	    return;
+	    if(simfilter.sip!=(ippacket->ipheader.src_ip)){
+            return;
+        }
     }
     if(simfilter.dip!=0)
     {
-	    if(simfilter.dip!=(ippacket->ipheader.des_ip))
-	    return;
+	    if(simfilter.dip!=(ippacket->ipheader.des_ip)){
+	        return;
+        }
     }
     switch (int(ippacket->ipheader.protocol))
     {

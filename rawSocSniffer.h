@@ -11,11 +11,11 @@ typedef struct filter
 
 class rawsocsniffer:public rawsocket
 {
-    private:
+private:
 	filter simfilter;
 	char *packet;
 	const int max_packet_len=2048;
-    public:
+public:
 	rawsocsniffer(int protocol);
 	~rawsocsniffer(){}
 	bool init();
