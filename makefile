@@ -11,5 +11,8 @@ rawSocSniffer.o: rawSocSniffer.cpp
 rawSocket.o: rawSocket.cpp
 	g++ -c rawSocket.cpp
 
+libpcapSniffer: libpcapSniffer.cpp
+	g++ -o libpcapSniffer libpcapSniffer.cpp -lpcap
+
 clean:
-	rm  *.o main
+	rm  *.o main libpcapSniffer
